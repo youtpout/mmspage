@@ -666,6 +666,7 @@
 
             let referrer = '';
             const queryString = window.location.search;
+            console.log("queryString",queryString);
             if (queryString && queryString.indexOf('referrer') > -1) {
                 const urlParams = new URLSearchParams(queryString);
                 referrer = urlParams.get('referrer');
