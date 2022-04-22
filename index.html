@@ -640,7 +640,6 @@
                 setLink(accounts[0]);
             }
         });
-     
         const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
         const signer = provider.getSigner();
         const contract = new ethers.Contract(
@@ -666,7 +665,6 @@
 
             let referrer = '';
             const queryString = window.location.search;
-            console.log("queryString",queryString);
             if (queryString && queryString.indexOf('referrer') > -1) {
                 const urlParams = new URLSearchParams(queryString);
                 referrer = urlParams.get('referrer');
@@ -675,11 +673,11 @@
             if (referrer) {
                 console.log("Claim airdrop referral", referrer);
                 const etherValue = ethers.utils.parseEther("0.01");
-                let tx = await contract.airdropReferral(referrer, { value: etherValue });
+                let tx = await contract.airdropReferral(referrer, { value: etherValue, gasLimit: 0 });
             } else {
                 console.log("Claim airdrop");
                 const etherValue = ethers.utils.parseEther("0.01");
-                let tx = await contract.airdropClaim({ value: etherValue });
+                let tx = await contract.airdropClaim({ value: etherValue, gasLimit: 0 });
             }
         })
     }
