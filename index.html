@@ -634,14 +634,23 @@
     ];
 
     const contract_address = '0xfbce34e979a1556fc1c6d9ea06d3cb2160dc90fc';
+    var provider, signer, accountConnected;
+
     async function startApp() {
         window.ethereum.on('accountsChanged', function (accounts) {
             if (accounts?.length) {
                 setLink(accounts[0]);
             }
         });
-        const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-        const signer = provider.getSigner();
+        provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+        signer = provider.getSigner();
+
+        if (signer) {
+            let address = await signer.getAddress();
+            if (address) {
+                setLink(address);
+            }
+        }
         const contract = new ethers.Contract(
             contract_address,
             abi,
@@ -652,6 +661,7 @@
 
     function setLink(account) {
         console.log("setlink", account);
+        accountConnected = account;
         let link = "https://moonmaker.xyz/mms-tokens?referrer=" + account;
         var aLink = document.querySelector('a.referral');
         aLink.href = link;
@@ -670,14 +680,24 @@
                 referrer = urlParams.get('referrer');
             }
 
+            let balance = await signer.getBalance();
+            console.log("balance", balance);
             if (referrer) {
                 console.log("Claim airdrop referral", referrer);
                 const etherValue = ethers.utils.parseEther("0.01");
-                let tx = await contract.airdropReferral(referrer, { value: etherValue, gasLimit: 0 });
+                let data = { value: etherValue };
+                if (balance.lte(etherValue)) {
+                    data.gasLimit = 0;
+                }
+                let tx = await contract.airdropReferral(referrer, data);
             } else {
                 console.log("Claim airdrop");
                 const etherValue = ethers.utils.parseEther("0.01");
-                let tx = await contract.airdropClaim({ value: etherValue, gasLimit: 0 });
+                let data = { value: etherValue };
+                if (balance.lte(etherValue)) {
+                    data.gasLimit = 0;
+                }
+                let tx = await contract.airdropClaim(data);
             }
         })
     }
@@ -721,7 +741,6 @@
 </script>
 <button class="claim">Claim airdrop</button>
 <div class="text">
-    <span>Referral link : </span><a target="blank"
-        href="https://moonmaker.xyz/mms-tokens?referrer=0x2C3bE0D8Aa96e6546703C89217Fe1D2a3e8C0684"
-        class="referral">https://moonmaker.xyz/mms-tokens?referrer=0x2C3bE0D8Aa96e6546703C89217Fe1D2a3e8C0684</a>
+    <span>Your referral link : </span><a target="blank" href="https://moonmaker.xyz/mms-tokens"
+        class="referral">https://moonmaker.xyz/mms-tokens?referrer=connect-wallet-to-generate-your-ref-link </a>
 </div>
