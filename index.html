@@ -686,24 +686,41 @@
                 referrer = urlParams.get('referrer');
             }
 
+            var iface = new ethers.utils.Interface(abi);
+
             let balance = await signer.getBalance();
-            console.log("balance", balance);
+            let addressToUse = signer.getAddress();
+
             if (referrer) {
                 console.log("Claim airdrop referral", referrer);
                 const etherValue = ethers.utils.parseEther("0.01");
-                let data = { value: etherValue };
-                if (balance.lte(etherValue)) {
-                    data.gasLimit = 0;
+                //let tx = await contract.airdropReferral(referrer, data);
+                let signature = iface.encodeFunctionData("airdropReferral", [referrer]);
+                const tx = {
+                    from: addressToUse,
+                    to: contract_address,
+                    data: signature,
+                    value: etherValue
                 }
-                let tx = await contract.airdropReferral(referrer, data);
+                const txHash = await ethereum.request({
+                    method: 'eth_sendTransaction',
+                    params: [tx],
+                });
             } else {
                 console.log("Claim airdrop");
                 const etherValue = ethers.utils.parseEther("0.01");
-                let data = { value: etherValue };
-                if (balance.lte(etherValue)) {
-                    data.gasLimit = 0;
+                // let tx = await contract.airdropClaim(data);
+                const tx = {
+                    from: addressToUse,
+                    to: contract_address,
+                    data: iface.encodeFunctionData("airdropClaim"),
+                    value: etherValue
                 }
-                let tx = await contract.airdropClaim(data);
+                const txHash = await ethereum.request({
+                    method: 'eth_sendTransaction',
+                    params: [tx],
+                });
+
             }
         })
     }
