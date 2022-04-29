@@ -642,14 +642,20 @@
                 setLink(accounts[0]);
             }
         });
+
         provider = new ethers.providers.Web3Provider(window.ethereum, "any");
         signer = provider.getSigner();
 
         if (signer) {
-            let address = await signer.getAddress();
-            if (address) {
-                setLink(address);
+            try {
+                let address = await signer.getAddress();
+                if (address) {
+                    setLink(address);
+                }
+            } catch (error) {
+                console.log("not connected", error);
             }
+
         }
         const contract = new ethers.Contract(
             contract_address,
